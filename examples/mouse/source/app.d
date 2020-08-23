@@ -4,7 +4,9 @@ import std.parallelism;
 import framed;
 
 void main() {
-	Framebuffer win = openWindow("Mouse 🐭🖱");
+	WindowOptions opts = WindowOptions("Mouse 🐭🖱");
+	opts.resizable = false;
+	Framebuffer win = openWindow(opts);
 	bool running = true;
 	bool colored = false;
 	uint[] data;

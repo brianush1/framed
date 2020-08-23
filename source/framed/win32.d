@@ -25,6 +25,7 @@ struct Win32Data {
 	int rWidth;
 	int rHeight;
 	bool[cast(size_t) KeyCode.Menu + 1] keysDown;
+	bool[cast(size_t) MouseButton.Right + 1] buttonsDown;
 	bool mouseOutside;
 	bool cursorTracked;
 }
@@ -269,12 +270,42 @@ extern (Windows) LRESULT wndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 
 		EventType type;
 
+		bool set = true;
+		foreach (v; self.buttonsDown) {
+			if (v) {
+				set = false;
+				break;
+			}
+		}
+
+		if (set) {
+			SetCapture(self.hwnd);
+		}
+
 		if (Msg == WM_LBUTTONDOWN || Msg == WM_MBUTTONDOWN
 			|| Msg == WM_RBUTTONDOWN) {
 			type = EventType.MouseDown;
+			if (self.buttonsDown[button])
+				return 0;
+			self.buttonsDown[button] = true;
 		}
 		else {
 			type = EventType.MouseUp;
+			if (!self.buttonsDown[button])
+				return 0;
+			self.buttonsDown[button] = false;
+		}
+
+		set = true;
+		foreach (v; self.buttonsDown) {
+			if (v) {
+				set = false;
+				break;
+			}
+		}
+
+		if (set) {
+			ReleaseCapture();
 		}
 
 		auto ev = Event(type);
@@ -408,18 +439,23 @@ Framebuffer win32OpenWindow(WindowOptions options) {
 
 	wchar* wtitle = options.title.toWStr;
 
+	int style = WS_OVERLAPPEDWINDOW;
+	if (!options.resizable) {
+		style ^= WS_THICKFRAME | WS_MAXIMIZEBOX;
+	}
+
 	RECT r;
 	r.left = 0;
 	r.top = 0;
 	r.right = options.initialWidth;
 	r.bottom = options.initialHeight;
-	AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, FALSE);
+	AdjustWindowRect(&r, style, FALSE);
 
 	// dfmt off
 	HWND hwnd = CreateWindowW(
 		"WindowClass"w.ptr,
 		wtitle,
-		WS_OVERLAPPEDWINDOW,
+		style,
 		0, 0,
 		r.right - r.left, r.bottom - r.top,
 		GetDesktopWindow(),
