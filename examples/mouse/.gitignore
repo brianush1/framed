@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/mouse
+mouse.so
+mouse.dylib
+mouse.dll
+mouse.a
+mouse.lib
+mouse-test-*
+*.exe
+*.o
+*.obj
+*.lst

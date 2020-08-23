@@ -1,0 +1,15 @@
+{
+	"authors": [
+		"Brian"
+	],
+	"dependencies": {
+		"framed": {
+			"path": "../..",
+			"version": ">=0.0.0"
+		}
+	},
+	"copyright": "Copyright © 2020, Brian",
+	"description": "Framed example app",
+	"license": "public domain",
+	"name": "noise"
+}

@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"Brian"
+	],
+	"buildOptions": [
+		"betterC"
+	],
+	"copyright": "Copyright © 2020, Brian",
+	"description": "Provides a system-independent framebuffer to draw pixels in",
+	"license": "public domain",
+	"name": "framed"
+}

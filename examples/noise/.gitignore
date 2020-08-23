@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/noise
+noise.so
+noise.dylib
+noise.dll
+noise.a
+noise.lib
+noise-test-*
+*.exe
+*.o
+*.obj
+*.lst

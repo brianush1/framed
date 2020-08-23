@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/framed
+framed.so
+framed.dylib
+framed.dll
+framed.a
+framed.lib
+framed-test-*
+*.exe
+*.o
+*.obj
+*.lst
