@@ -51,9 +51,11 @@ void main() {
 				mouseIn = false;
 				break;
 			case EventType.MouseDown:
+				win.cursorVisible = false;
 				mouseDown = true;
 				break;
 			case EventType.MouseUp:
+				win.cursorVisible = true;
 				mouseDown = false;
 				break;
 			default:

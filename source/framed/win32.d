@@ -24,18 +24,31 @@ struct Win32Data {
 	LinkedNode* evqTail;
 	int rWidth;
 	int rHeight;
+	int width;
+	int height;
 	bool[cast(size_t) KeyCode.Menu + 1] keysDown;
 	bool[cast(size_t) MouseButton.Right + 1] buttonsDown;
 	bool mouseOutside;
 	bool cursorTracked;
+	bool cursorVisible;
+}
+
+void updateWindowSize(Win32Data* self) {
+	RECT r;
+	if (GetClientRect(self.hwnd, &r)) {
+		self.width = cast(int)(r.right - r.left);
+		self.height = cast(int)(r.bottom - r.top);
+	}
 }
 
 void advanceQueue(Win32Data* self) {
 	MSG msg;
 	while (PeekMessageW(&msg, self.hwnd, 0, 0, PM_REMOVE)) {
+		updateWindowSize(self);
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+	updateWindowSize(self);
 }
 
 void addToEvq(Win32Data* self, Event ev) {
@@ -52,19 +65,27 @@ void addToEvq(Win32Data* self, Event ev) {
 }
 
 int getWidth(Win32Data* self) {
-	RECT r;
-	if (!GetClientRect(self.hwnd, &r)) {
-		return 0;
-	}
-	return cast(int)(r.right - r.left);
+	return self.width;
 }
 
 int getHeight(Win32Data* self) {
-	RECT r;
-	if (!GetClientRect(self.hwnd, &r)) {
-		return 0;
+	return self.height;
+}
+
+bool getCursorVisible(Win32Data* self) {
+	return self.cursorVisible;
+}
+
+void setCursorVisible(Win32Data* self, bool value) {
+	self.cursorVisible = value;
+	if (self.cursorVisible != value) {
+		if (value) {
+			ShowCursor(TRUE);
+		}
+		else {
+			ShowCursor(FALSE);
+		}
 	}
-	return cast(int)(r.bottom - r.top);
 }
 
 void close(Win32Data* self) {
@@ -81,9 +102,11 @@ void yield(Win32Data* self) {
 	MSG msg;
 	while (self.evqHead == null) {
 		GetMessage(&msg, self.hwnd, 0, 0);
+		updateWindowSize(self);
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+	updateWindowSize(self);
 }
 
 bool evqEmpty(Win32Data* self) {
@@ -428,6 +451,8 @@ Framebuffer win32OpenWindow(WindowOptions options) {
 	WindowData* data = cast(WindowData*) malloc(WindowData.sizeof);
 	data.getWidth = cast(int function(void*) nothrow)&getWidth;
 	data.getHeight = cast(int function(void*) nothrow)&getHeight;
+	data.getCursorVisible = cast(bool function(void*) nothrow)&getCursorVisible;
+	data.setCursorVisible = cast(void function(void*, bool) nothrow)&setCursorVisible;
 	data.close = cast(void function(void*) nothrow)&close;
 	data.update = cast(void function(void*, uint[]) nothrow)&update;
 	data.yield = cast(void function(void*) nothrow)&yield;
@@ -469,11 +494,14 @@ Framebuffer win32OpenWindow(WindowOptions options) {
 	self.hwnd = hwnd;
 	self.rWidth = options.initialWidth;
 	self.rHeight = options.initialHeight;
+	self.width = options.initialWidth;
+	self.height = options.initialHeight;
 	self.mouseOutside = true;
 	self.cursorTracked = false;
 	self.buffer = null;
 	self.evqHead = null;
 	self.evqTail = null;
+	self.cursorVisible = true;
 
 	SetWindowLongPtr(hwnd, GWLP_USERDATA, cast(LONG_PTR) self);
 

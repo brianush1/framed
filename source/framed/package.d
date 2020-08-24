@@ -22,6 +22,8 @@ nothrow:
 	void* udata;
 	int function(void*) getWidth;
 	int function(void*) getHeight;
+	bool function(void*) getCursorVisible;
+	void function(void*, bool) setCursorVisible;
 	void function(void*) close;
 	void function(void*, uint[]) update;
 	void function(void*) yield;
@@ -226,7 +228,7 @@ nothrow:
 		}
 	}
 
-	private WindowData* window() {
+	private WindowData* window() inout {
 		return cast(WindowData*) data;
 	}
 
@@ -265,6 +267,25 @@ nothrow:
 			break;
 		case FramebufferType.Window:
 			window.yield(window.udata);
+			break;
+		}
+	}
+
+	bool cursorVisible() const @property {
+		final switch (type) {
+		case FramebufferType.Null:
+			return false;
+		case FramebufferType.Window:
+			return window.getCursorVisible(window.udata);
+		}
+	}
+
+	void cursorVisible(bool value) @property {
+		final switch (type) {
+		case FramebufferType.Null:
+			break;
+		case FramebufferType.Window:
+			window.setCursorVisible(window.udata, value);
 			break;
 		}
 	}
