@@ -22,14 +22,19 @@ nothrow:
 	void* udata;
 	int function(void*) getWidth;
 	int function(void*) getHeight;
-	bool function(void*) getCursorVisible;
-	void function(void*, bool) setCursorVisible;
+	Cursors function(void*) getCursor;
+	void function(void*, Cursors) setCursor;
 	void function(void*) close;
 	void function(void*, uint[]) update;
 	void function(void*) yield;
 	bool function(void*) evqEmpty;
 	Event function(void*) evqFront;
 	void function(void*) evqPopFront;
+}
+
+enum Cursors {
+	None,
+	Arrow,
 }
 
 enum EventType {
@@ -271,21 +276,21 @@ nothrow:
 		}
 	}
 
-	bool cursorVisible() const @property {
+	Cursors cursor() const @property {
 		final switch (type) {
 		case FramebufferType.Null:
-			return false;
+			return Cursors.None;
 		case FramebufferType.Window:
-			return window.getCursorVisible(window.udata);
+			return window.getCursor(window.udata);
 		}
 	}
 
-	void cursorVisible(bool value) @property {
+	void cursor(Cursors value) @property {
 		final switch (type) {
 		case FramebufferType.Null:
 			break;
 		case FramebufferType.Window:
-			window.setCursorVisible(window.udata, value);
+			window.setCursor(window.udata, value);
 			break;
 		}
 	}

@@ -30,7 +30,7 @@ struct Win32Data {
 	bool[cast(size_t) MouseButton.Right + 1] buttonsDown;
 	bool mouseOutside;
 	bool cursorTracked;
-	bool cursorVisible;
+	Cursors cursor;
 }
 
 void updateWindowSize(Win32Data* self) {
@@ -64,6 +64,17 @@ void addToEvq(Win32Data* self, Event ev) {
 	self.evqTail = node;
 }
 
+void updateCursor(Win32Data* self) {
+	final switch (self.cursor) {
+	case Cursors.Arrow:
+		SetCursor(LoadCursorW(NULL, IDC_ARROW));
+		break;
+	case Cursors.None:
+		SetCursor(NULL);
+		break;
+	}
+}
+
 int getWidth(Win32Data* self) {
 	return self.width;
 }
@@ -72,20 +83,13 @@ int getHeight(Win32Data* self) {
 	return self.height;
 }
 
-bool getCursorVisible(Win32Data* self) {
-	return self.cursorVisible;
+Cursors getCursor(Win32Data* self) {
+	return self.cursor;
 }
 
-void setCursorVisible(Win32Data* self, bool value) {
-	self.cursorVisible = value;
-	if (self.cursorVisible != value) {
-		if (value) {
-			ShowCursor(TRUE);
-		}
-		else {
-			ShowCursor(FALSE);
-		}
-	}
+void setCursor(Win32Data* self, Cursors value) {
+	self.cursor = value;
+	updateCursor(self);
 }
 
 void close(Win32Data* self) {
@@ -363,6 +367,12 @@ extern (Windows) LRESULT wndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 		self.keysDown[ev.key] = false;
 		addToEvq(self, ev);
 		break;
+	case WM_SETCURSOR:
+		if (LOWORD(lParam) == HTCLIENT) {
+			updateCursor(self);
+			return TRUE;
+		}
+		break;
 	case WM_ERASEBKGND:
 		return TRUE;
 	case WM_PAINT:
@@ -451,8 +461,8 @@ Framebuffer win32OpenWindow(WindowOptions options) {
 	WindowData* data = cast(WindowData*) malloc(WindowData.sizeof);
 	data.getWidth = cast(int function(void*) nothrow)&getWidth;
 	data.getHeight = cast(int function(void*) nothrow)&getHeight;
-	data.getCursorVisible = cast(bool function(void*) nothrow)&getCursorVisible;
-	data.setCursorVisible = cast(void function(void*, bool) nothrow)&setCursorVisible;
+	data.getCursor = cast(Cursors function(void*) nothrow)&getCursor;
+	data.setCursor = cast(void function(void*, Cursors) nothrow)&setCursor;
 	data.close = cast(void function(void*) nothrow)&close;
 	data.update = cast(void function(void*, uint[]) nothrow)&update;
 	data.yield = cast(void function(void*) nothrow)&yield;
@@ -501,7 +511,7 @@ Framebuffer win32OpenWindow(WindowOptions options) {
 	self.buffer = null;
 	self.evqHead = null;
 	self.evqTail = null;
-	self.cursorVisible = true;
+	self.cursor = Cursors.Arrow;
 
 	SetWindowLongPtr(hwnd, GWLP_USERDATA, cast(LONG_PTR) self);
 
