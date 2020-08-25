@@ -254,7 +254,7 @@ extern (Windows) LRESULT wndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 		if (!self.cursorTracked) {
 			self.cursorTracked = true;
 
-			TRACKMOUSEEVENT track;
+			TRACKMOUSEEVENT track = void;
 			track.cbSize = TRACKMOUSEEVENT.sizeof;
 			track.dwFlags = TME_LEAVE;
 			track.hwndTrack = self.hwnd;
@@ -309,8 +309,7 @@ extern (Windows) LRESULT wndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 			SetCapture(self.hwnd);
 		}
 
-		if (Msg == WM_LBUTTONDOWN || Msg == WM_MBUTTONDOWN
-			|| Msg == WM_RBUTTONDOWN) {
+		if (Msg == WM_LBUTTONDOWN || Msg == WM_MBUTTONDOWN || Msg == WM_RBUTTONDOWN) {
 			type = EventType.MouseDown;
 			if (self.buttonsDown[button])
 				return 0;
@@ -368,7 +367,7 @@ extern (Windows) LRESULT wndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 		addToEvq(self, ev);
 		break;
 	case WM_SETCURSOR:
-		if (LOWORD(lParam) == HTCLIENT) {
+		if (cast(ushort) lParam == HTCLIENT) {
 			updateCursor(self);
 			return TRUE;
 		}
@@ -429,7 +428,7 @@ void win32Init() {
 
 	hInstance = GetModuleHandle(NULL);
 
-	WNDCLASSEX wc;
+	WNDCLASSEX wc = void;
 	wc.cbSize = WNDCLASSEX.sizeof;
 	wc.style = 0;
 	wc.lpfnWndProc = &wndProc;
@@ -487,7 +486,8 @@ Framebuffer win32OpenWindow(WindowOptions options) {
 	AdjustWindowRect(&r, style, FALSE);
 
 	// dfmt off
-	HWND hwnd = CreateWindowW(
+	HWND hwnd = CreateWindowExW(
+		0,
 		"WindowClass"w.ptr,
 		wtitle,
 		style,
