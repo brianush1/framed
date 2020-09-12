@@ -264,8 +264,8 @@ extern (Windows) LRESULT wndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 		}
 
 		auto ev = Event(EventType.MouseMove);
-		ev.x = cast(int)(lParam & 0xFFFF);
-		ev.y = cast(int)(lParam >> 16);
+		ev.x = cast(short) lParam;
+		ev.y = cast(short)(lParam >> 16);
 		if (self.mouseOutside) {
 			self.mouseOutside = false;
 			addToEvq(self, Event(EventType.MouseEnter));

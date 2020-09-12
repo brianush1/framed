@@ -113,19 +113,19 @@ nothrow:
 	long b;
 
 	int width() const @property {
-		return cast(int)(a & 0xFFFFFFFF);
+		return cast(int) a;
 	}
 
 	void width(int value) @property {
-		a = (cast(long) height << 32L) | cast(long) value;
+		a = (cast(ulong) height << 32UL) | cast(uint) value;
 	}
 
 	int height() const @property {
-		return cast(int)(a >> 32);
+		return cast(int)(a >> 32UL);
 	}
 
 	void height(int value) @property {
-		a = (cast(long) value << 32L) | cast(long) width;
+		a = (cast(ulong) value << 32UL) | cast(uint) width;
 	}
 
 	int x() const @property {
