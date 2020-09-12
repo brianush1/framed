@@ -225,10 +225,12 @@ extern (Windows) LRESULT wndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 		addToEvq(self, Event(EventType.CloseRequest));
 		return 0;
 	case WM_ENTERSIZEMOVE:
+		updateWindowSize(self);
 		self.rWidth = getWidth(self);
 		self.rHeight = getHeight(self);
 		break;
 	case WM_EXITSIZEMOVE:
+		updateWindowSize(self);
 		auto ev = Event(EventType.Resize);
 		if (self.rWidth != getWidth(self) || self.rHeight != getHeight(self)) {
 			ev.width = self.rWidth;
@@ -239,6 +241,7 @@ extern (Windows) LRESULT wndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 		}
 		break;
 	case WM_SIZE:
+		updateWindowSize(self);
 		if (wParam == 0 && self.rWidth != 0 && self.rHeight != 0)
 			break;
 		auto ev = Event(EventType.Resize);
