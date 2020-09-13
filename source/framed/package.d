@@ -3,6 +3,8 @@ import framed.win32;
 import core.stdc.stdlib;
 
 version (Windows) {
+	import core.sys.windows.windows;
+
 	enum FramedWindowSupport = true;
 }
 else {
@@ -30,6 +32,9 @@ nothrow:
 	bool function(void*) evqEmpty;
 	Event function(void*) evqFront;
 	void function(void*) evqPopFront;
+	version (Windows) {
+		HWND function(void*) getHwnd;
+	}
 }
 
 enum Cursors {
@@ -326,13 +331,17 @@ nothrow:
 }
 
 static if (FramedWindowSupport) {
-	Framebuffer openWindow(WindowOptions options) {
-		version (Windows) {
+	version (Windows) {
+		Framebuffer openWindow(WindowOptions options) {
 			return win32OpenWindow(options);
 		}
-		else {
-			static assert(0);
+
+		HWND getWin32Hwnd(Framebuffer buffer) {
+			return buffer.window.getHwnd(buffer.window.udata);
 		}
+	}
+	else {
+		static assert(0);
 	}
 
 	Framebuffer openWindow(Args...)(Args args) {

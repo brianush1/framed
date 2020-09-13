@@ -134,6 +134,10 @@ void evqPopFront(Win32Data* self) {
 	}
 }
 
+HWND getHwnd(Win32Data* self) {
+	return self.hwnd;
+}
+
 int translateKey(WPARAM wParam, LPARAM lParam) {
 	WPARAM vk = wParam;
 	UINT scancode = (lParam >> 16) & 0xFF;
@@ -471,6 +475,7 @@ Framebuffer win32OpenWindow(WindowOptions options) {
 	data.evqEmpty = cast(bool function(void*) nothrow)&evqEmpty;
 	data.evqFront = cast(Event function(void*) nothrow)&evqFront;
 	data.evqPopFront = cast(void function(void*) nothrow)&evqPopFront;
+	data.getHwnd = cast(HWND function(void*) nothrow)&getHwnd;
 
 	win32Init();
 
